@@ -5,23 +5,85 @@
 </head>
 <body>
     <h4>Cadastro de {{titulo}}</h4>
-    <form action="/anuncio/novo" method="post">
-        <p><label for="produtos">Selecione o Produto<label> </p>
-        <p><input type="text" id="prod" name="prod"> </p>
+    <form action="/anuncio/criar" method="post">
+        <p><label for="nome">Nome<label>
+        <input type="text" id="nome" name="nome"> </p>
 
-        <p><label for="data">Data do Anuncio<label> </p>
-        <p><input type="text" id="data" name="data"> </p>
+        <p><label for="descricao">Descrição<label>
+        <textarea rows="4" cols="50" id="descricao" name="descricao"></textarea></p> 
 
-        <p><label for="quant">Quantidade<label> </p>
-        <p><input type="text" id="quant" name="quant"> </p>
+        <p><label for="data">Data do Anuncio<label>
+        <input type="text" id="data" name="data"> </p>
 
-        <p><label for="valor">Valor<label> </p>
-        <p><input type="text" id="valor" name="valor"> </p>
+        <p><label for="quant">Quantidade<label>
+        <input type="text" id="quant" name="quant"> </p>
+
+        <p><label for="valor">Valor<label>
+        <input type="text" id="valor" name="valor"> </p>
+
+        <p><label for="situacao">Situação<label>
+        <input type="text" id="situacao" name="situacao"> </p
+>
+        <p><label for="id_us_prop_anuncio">Selecione o Usuário Proprietário   <label>
+        <select id="id_us_prop_anuncio" name="id_us_prop_anuncio">
+            {% for u in usuarios %}
+                <option value="{{ u.id_usuario }}">{{ u.nome }}</option>
+            {% endfor %}
+        </select> </p>             
+
+        <p><label for="id_cat">Selecione a Categoria<label>
+        <select id="id_cat" name="id_cat">
+            {% for c in categorias %}
+                <option value="{{ c.id_categoria }}">{{ c.descricao }}</option>
+            {% endfor %}    
+        </select> </p>   
    
-        <p><input type="submit" value="cadastrar"> </p>
+        <p><input type="submit" value="Cadastrar"> </p>
     </form>
     
     <h4>Lista de {{titulo}}</h4>
+     <table>
+        <thead>
+            <tr>
+                <th> Código </th>
+                <th> Nome </th>
+                <th> Descrição </th>
+                <th> Data </th>
+                <th> Quantidade </th>
+                <th> Valor </th>
+                <th> Situação </th>
+                <th> Usuário_ID </th>
+                <th> Categoria_ID </th>
+                <th> Editar </th>
+                <th> Deletar </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in anuncios %}
+            <tr>
+                <td>{{ a.id_anuncio }}</td>
+                <td>{{ a.nome }}</td>
+                <td>{{ a.descricao }}</td>
+                <td>{{ a.data }}</td>
+                <td>{{ a.quantidade }}</td>
+                <td>{{ a.valor }}</td>
+                <td>{{ a.situacao }}</td>
+                <td>{{ a.id_us_prop_anuncio }}</td>
+                <td>{{ a.id_cat }}</td>
+                <td><a href={{ url_for("editaranuncio", id_anuncio=a.id_anuncio) }}> Editar? </a></td>
+                <td><a href={{ url_for("excluiranuncio", id_anuncio=a.ide_anuncio) }}> Deletar? </a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+     </table>
+</body>
+
+
+
+
+
+
+
 </body>
 
 </html>

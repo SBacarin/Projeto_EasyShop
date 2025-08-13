@@ -5,23 +5,29 @@
 </head>
 <body>
      <h4>Cadastro de {{titulo}}</h4>
-    <form action="/categoria/novo" method="post">
+    <form action="/categoria/criar" method="post">
         <p><label for="descricao">Descrição<label> 
         <input type="text" id="descricao" name="descricao"> </p>
         
-        <p><input type="submit" value="cadastrar"> </p>
+        <p><input type="submit" value="Cadastrar"> </p>
     </form>
      <h4>Lista de {{titulo}}</h4>
      <table>
         <thead>
             <tr>
-                <th>descricao</th>
+                <th> Código </th>
+                <th> Descricao </th>
+                <th> Editar </th>
+                <th> Deletar </th>
             </tr>
         </thead>
         <tbody>
             {% for c in categorias %}
             <tr>
+                <td>{{c.id_categoria}}</td>
                 <td>{{c.descricao}}</td>
+                <td><a href={{ url_for("editarcategoria", id_categoria=c.id_categoria) }}> Editar? </a></td>
+                <td><a href={{ url_for("excluircategoria", id_categoria=c.id_categoria) }}> Deletar? </a></td>
             </tr>
             {% endfor %}
      </table>
