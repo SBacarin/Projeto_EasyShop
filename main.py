@@ -49,19 +49,25 @@ class Usuario(db.Model):
 class Anuncio(db.Model):
     __tablename__ = "anuncio"
     id_anuncio = db.Column('id_anuncio', db.Integer, primary_key=True)
-    data = db.Column('data', db.DateTime, nullable=False) 
-    quantidade = db.Column('quantidade', db.Integer)
-    valor = db.Column('valor', db.Float)
-    situacao = db.Column('situacao', db.String(45))
+    nome = db.Column('nome', db.String(200))  # Nome do Anúncio
+    descricao = db.Column('descricao', db.String(500))  # Descrição do Anúncio  
+    data = db.Column('data', db.DateTime, nullable=False)  # Data do Anúncio
+    quantidade = db.Column('quantidade', db.Integer)   # Quantidade do Anúncio
+    valor = db.Column('valor', db.Float) # Valor do Anúncio
+    situacao = db.Column('situacao', db.String(45))  # Situação do Anúncio (Ativo, Vendido, Cancelado)
     id_us_prop_anuncio = db.Column('id_us_prop_anuncio', db.ForeignKey('usuario.id_usuario'))
+    id_cat = db.Column('id_categoria', db.ForeignKey('categoria.id_categoria'))   
     
     ## constroe automaticamente um objeto com estes valores
-    def __init__(self, data, quantidade, valor, situacao, is_us_prop_anuncio):
+    def __init__(self, nome, descricao, data, quantidade, valor, situacao, is_us_prop_anuncio, id_cat):
+         self.nome = nome
+         self.descricao = descricao
          self.data = data
          self.quantidade = quantidade
          self.valor = valor
          self.situacao = situacao
-         self.is_us_prop_anuncio = is_us_prop_anuncio   
+         self.is_us_prop_anuncio = is_us_prop_anuncio
+         self.id_cat = id_cat   
 
 class Perg_resp(db.Model):
     __tablename__ = "perg_resp"
@@ -142,8 +148,8 @@ def index():
 def cadusuario():
     return render_template('usuarios.html', usuarios = Usuario.query.all(), titulo="Usuarios")
 
-@app.route("/usuario/novo", methods=['POST'])
-def novousuario():
+@app.route("/usuario/criar", methods=['POST'])
+def criarusuario():
     usuario = Usuario(
         request.form.get('nome'),
         request.form.get('login'),
@@ -161,14 +167,61 @@ def novousuario():
     db.session.commit() 
     return redirect(url_for('cadusuario'))
 
+@app.route("/usuario/detalhar/<int:id_usuario>")
+def detalharusuario(id_usuario):
+    usuario = Usuario.query.get(id_usuario)
+    if usuario:
+        return usuario.nome + "<br>" + \
+               usuario.login + "<br>" + \
+               usuario.email + "<br>" + \
+               usuario.fone + "<br>" + \
+               usuario.rua + "<br>" + \
+               usuario.numero + "<br>" + \
+               usuario.bairro + "<br>" + \
+               usuario.cidade + "<br>" + \
+               usuario.estado + "<br>" + \
+               usuario.cep      
+    else:
+        return "Usuário não encontrado", 404
+
+@app.route("/usuario/editar/<int:id_usuario>", methods=['GET', 'POST'])
+def editarusuario(id_usuario):  
+    usuario = Usuario.query.get(id_usuario)
+    if request.method == 'POST':
+        usuario.nome = request.form.get('nome')
+        usuario.login = request.form.get('login')
+        usuario.senha = request.form.get('senha')
+        usuario.email = request.form.get('email')   
+        usuario.fone = request.form.get('fone')
+        usuario.rua = request.form.get('rua')
+        usuario.numero = request.form.get('numero')
+        usuario.bairro = request.form.get('bairro')
+        usuario.cidade = request.form.get('cidade')
+        usuario.estado = request.form.get('estado')
+        usuario.cep = request.form.get('cep')
+        db.session.add(usuario)
+        db.session.commit()
+        return redirect(url_for('cadusuario'))
+    return render_template('edit_usuario.html', usuario = usuario, titulo="Usuarios")          
+
+@app.route("/usuario/excluir/<int:id_usuario>")
+def excluirusuario(id_usuario):
+    usuario = Usuario.query.get(id_usuario)
+    if usuario:
+        db.session.delete(usuario)
+        db.session.commit()
+        return redirect(url_for('cadusuario'))
+    else:
+        return "Usuário não encontrado", 404        
+
 
 ####################### CATEGORIAS #######################
 @app.route("/cad/categoria")
 def cadcategoria():
     return render_template('categorias.html',categorias = Categoria.query.all(), titulo="Categorias")
 
-@app.route("/categoria/novo", methods=['POST'])
-def novacategoria():
+@app.route("/categoria/criar", methods=['POST'])
+def criarcategoria():
     categoria = Categoria(
         request.form.get('descricao')
     )
@@ -176,29 +229,109 @@ def novacategoria():
     db.session.commit()
     return redirect(url_for('cadcategoria'))
 
+@app.route("/categoria/detalhar/<int:id_categoria>")
+def detalharcategoria(id_categoria):
+    categoria = Categoria.query.get(id_categoria)
+    if categoria:
+        return categoria.descricao
+    else:
+        return "Categoria não encontrada", 404
+
+@app.route("/categoria/editar/<int:id_categoria>", methods=['GET', 'POST'])
+def editarcategoria(id_categoria):
+    categoria = Categoria.query.get(id_categoria)
+    if request.method == 'POST':
+        categoria.descricao = request.form.get('descricao')
+        db.session.add(categoria)
+        db.session.commit()
+        return redirect(url_for('cadcategoria'))    
+    return render_template('edit_categoria.html', categoria = categoria, titulo="Categorias")   
+
+@app.route("/categoria/excluir/<int:id_categoria>")
+def excluircategoria(id_categoria):     
+    categoria = Categoria.query.get(id_categoria)
+    if categoria:
+        db.session.delete(categoria)
+        db.session.commit()
+        return redirect(url_for('cadcategoria'))
+    else:
+        return "Categoria não encontrada", 404
+
 
 ####################### ANUNCIOS #######################
 @app.route("/cad/anuncio")
 def cadanuncio():
-    return render_template('anuncios.html', titulo="Anúncios" )
+    return render_template('anuncios.html',
+    anuncios=Anuncio.query.all(),
+    usuarios=Usuario.query.all(),
+    categorias=Categoria.query.all(),
+    titulo="Anúncios" )
 
-app.route("/anuncio/novo", methods=['POST'])
-def novoanuncio(): 
+@app.route("/anuncio/criar", methods=['POST'])
+def criaranuncio(): 
     anuncio = Anuncio(
+        request.form.get('nome'),
+        request.form.get('descricao'),
         request.form.get('data'),
         request.form.get('quantidade'),
         request.form.get('valor'),
         request.form.get('situacao'),
-        request.form.get('id_us_prop_anuncio')                
+        request.form.get('id_us_prop_anuncio' ),  # ID do Usuário Proprietário do Anúncio
+        request.form.get('id_cat')  # ID da Categoria          
     )
     db.session.add(anuncio)
     db.session.commit()
     return redirect(url_for('cadanuncio'))
 
+@app.route("/anuncio/detalhar/<int:id_anuncio>")
+def detalharanuncio(id_anuncio):
+    anuncio = Anuncio.query.get(id_anuncio)
+    if anuncio:
+        return anuncio.id_anuncio + "<br>" + \
+               anuncio.nome + "<br>" + \
+               anuncio.descricao + "<br>" + \
+               str(anuncio.data) + "<br>" + \
+               str(anuncio.quantidade) + "<br>" + \
+               str(anuncio.valor) + "<br>" + \
+               anuncio.situacao + "<br>" + \
+               str(anuncio.is_us_prop_anuncio) + "<br>" + \
+               str(anuncio.id_cat) + "<br>"                
+    else:
+        return "Anúncio não encontrado", 404
+
+@app.route("/anuncio/editar/<int:id_anuncio>", methods=['GET', 'POST'])
+def editaranuncio(id_anuncio):
+    anuncio = Anuncio.query.get(id_anuncio)
+    if request.method == 'POST':
+        anuncio.nome = request.form.get('nome')
+        anuncio.descricao = request.form.get('descricao')
+        anuncio.data = request.form.get('data')
+        anuncio.quantidade = request.form.get('quantidade')
+        anuncio.valor = request.form.get('valor')
+        anuncio.situacao = request.form.get('situacao')
+        anuncio.id_us_prop_anuncio = request.form.get('id_us_prop_anuncio')
+        anuncio.id_cat = request.form.get('id_cat')
+        db.session.add(anuncio)
+        db.session.commit()
+        return redirect(url_for('cadanuncio'))
+    return render_template('edit_anuncio.html', anuncio = anuncio, titulo="Anúncios")
+
+@app.route("/anuncio/excluir/<int:id_anuncio>")
+def excluiranuncio(id_anuncio):
+    anuncio = Anuncio.query.get(id_anuncio)
+    if anuncio:
+        db.session.delete(anuncio)
+        db.session.commit()
+        return redirect(url_for('cadanuncio'))
+    else:
+        return "Anúncio não encontrado", 404
+
+
 ####################### PRODUTOS #######################
 @app.route("/cad/produto")
 def cadproduto():
     return render_template('produtos.html', produtos = Produto.query.all(), titulo="Produtos")
+
 @app.route("/produto/novo", methods=['POST']) 
 def novoproduto():
     produto = Produto(

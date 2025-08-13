@@ -5,7 +5,7 @@
 </head>
 <body>
      <h4>Cadastro de {{titulo}}</h4>
-    <form action="/usuario/novo" method="post">
+    <form action="/usuario/criar" method="post">
         <p><label for="nome">Nome<label> 
         <input type="text" id="nome" name="nome"> </p>
 
@@ -39,25 +39,43 @@
         <p><label for="cep">CEP<label>
         <input type="text" id="cep" name="cep"> </p>
     
-        <p><input type="submit" value="cadastrar"> </p>
+        <p><input type="submit" value="Cadastrar"> </p>
     </form>
      <h4>Lista de {{titulo}}</h4>
      <table>
         <thead>
             <tr>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Senha</th>
-                <th>Rua</th>
+                <th> Codigo </th>
+                <th> Nome </th>
+                <th> Login </th>
+                <th> Senha </th>
+                <th> E-mail </th>
+                <th> Rua </th>
+                <th> Numero </th>
+                <th> Bairro </th>
+                <th> Cidade </th>
+                <th> Estado </th>
+                <th> Cep </th>    
+                <th> Editar </th>
+                <th> Deletar </th>
             </tr>
         </thead>
         <tbody>
             {% for u in usuarios %}
             <tr>
-                <td>{{u.nome}}</td>
-                <td>{{u.email}}</td>
-                <td>{{u.senha}}</td>
-                <td>{{u.rua}}</td>
+                <td>{{ u.id_usuario }}</td>
+                <td>{{ u.nome }}</td>
+                <td>{{ u.login }}</td>
+                <td>{{ u.senha }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.rua }}</td>
+                <td>{{ u.numero }}</td>
+                <td>{{ u.bairro }}</td>
+                <td>{{ u.cidade }}</td>
+                <td>{{ u.estado }}</td>
+                <td>{{ u.cep }}</td>
+                <td><a href={{ url_for("editarusuario", id_usuario=u.id_usuario) }}> Editar? </a></td>
+                <td><a href={{ url_for("excluirusuario", id_usuario=u.id_usuario) }}> Deletar? </a></td>
             </tr>
             {% endfor %}
         </tbody>

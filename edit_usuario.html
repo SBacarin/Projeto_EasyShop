@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> EASYSHOP - Edição de {{titulo}} </title>
+</head>
+<body>
+    <h4>Edição de {{titulo}}</h4>
+    <form action="{{ url_for('editarusuario', id_usuario=usuario.id_usuario) }}" method="post">
+        <p><label for="nome">Nome<label> 
+        <input type="text" id="nome" name="nome" value="{{usuario.nome}}"></p>
+
+        <p><label for="login">Login<label> 
+        <input type="text" id="login" name="login" value="{{usuario.login}}"></p>
+
+        <p><label for="senha">Senha<label> 
+        <input type="text" id="senha" name="senha" value="{{usuario.senha}}"> </p>
+
+        <p><label for="email">E-mail<label>
+        <input type="text" id="email" name="email" value="{{usuario.email}}"> </p>
+
+        <p><label for="fone">Fone<label>
+        <input type="text" id="fone" name="fone" value="{{usuario.fone}}"> </p>
+
+        <p><label for="rua">Rua<label>
+        <input type="text" id="rua" name="rua" value="{{usuario.rua}}"> </p>
+
+        <p><label for="numero">Numero<label>
+        <input type="text" id="numero" name="numero" value="{{usuario.numero}}"> </p>
+
+        <p><label for="bairro">Bairro<label>
+        <input type="text" id="bairro" name="bairro" value="{{usuario.bairro}}"> </p>
+
+        <p><label for="cidade">Cidade<label>
+        <input type="text" id="cidade" name="cidade" value="{{usuario.cidade}}"> </p>
+
+        <p><label for="estado">Estado<label>
+        <input type="text" id="estado" name="estado" value="{{usuario.estado}}"> </p>
+
+        <p><label for="cep">CEP<label>
+        <input type="text" id="cep" name="cep" value="{{usuario.cep}}"> </p>
+    
+        <p><input type="submit" value="Alterar"> </p>
+    </form>
+    <a href={{url_for("cadusuario")}}> Cancelar</a>
+</body>
+
+</html>
