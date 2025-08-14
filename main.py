@@ -138,7 +138,13 @@ class Produto(db.Model):
         self.qt_estoque = qt_estoque       
 
 
+
 ####################### ROTAS #######################
+### Rota para tratamento de erro 404 - Página não encontrada
+@app.errorhandler(404)
+def paginanaoencontrada(error):
+    return render_template('pagnaoencontrada.html'), 404    
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -204,17 +210,25 @@ def editarusuario(id_usuario):
         return redirect(url_for('cadusuario'))
     return render_template('edit_usuario.html', usuario = usuario, titulo="Usuarios")          
 
-@app.route("/usuario/excluir/<int:id_usuario>")
+@app.route("/usuario/excluir/<int:id_usuario>", methods=['GET', 'POST'])
 def excluirusuario(id_usuario):
     usuario = Usuario.query.get(id_usuario)
-    if usuario:
-        db.session.delete(usuario)
-        db.session.commit()
-        return redirect(url_for('cadusuario'))
-    else:
-        return "Usuário não encontrado", 404        
-
-
+    if not usuario:
+        return "Usuário não encontrado", 404
+       
+    if request.method == 'POST':
+        if request.form.get('confirmar') == 'sim':
+            db.session.delete(usuario)
+            db.session.commit()
+            return redirect(url_for('cadusuario'))      
+        else:
+            return redirect(url_for('cadusuario')) 
+    
+    # GET: exibe a tela de confirmação
+    return render_template(
+        'confirmarexclusão.html',
+        url_cancelar ='cadusuario')
+         
 ####################### CATEGORIAS #######################
 @app.route("/cad/categoria")
 def cadcategoria():
@@ -247,15 +261,20 @@ def editarcategoria(id_categoria):
         return redirect(url_for('cadcategoria'))    
     return render_template('edit_categoria.html', categoria = categoria, titulo="Categorias")   
 
-@app.route("/categoria/excluir/<int:id_categoria>")
+@app.route("/categoria/excluir/<int:id_categoria>", methods=['GET', 'POST'])
 def excluircategoria(id_categoria):     
     categoria = Categoria.query.get(id_categoria)
-    if categoria:
-        db.session.delete(categoria)
-        db.session.commit()
-        return redirect(url_for('cadcategoria'))
-    else:
+    if not categoria:
         return "Categoria não encontrada", 404
+    
+    if request.method == 'POST':
+        if request.form.get('confirmar') == 'sim':
+            db.session.delete(categoria)
+            db.session.commit()
+            return redirect(url_for('cadcategoria'))   
+        else:
+            return "Categoria não encontrada", 404
+    return render_template('confirmarexclusão.html',url_cancelar ='cadcategoria')  
 
 
 ####################### ANUNCIOS #######################
@@ -316,15 +335,22 @@ def editaranuncio(id_anuncio):
         return redirect(url_for('cadanuncio'))
     return render_template('edit_anuncio.html', anuncio = anuncio, titulo="Anúncios")
 
-@app.route("/anuncio/excluir/<int:id_anuncio>")
+@app.route("/anuncio/excluir/<int:id_anuncio>", methods=['GET', 'POST'])
 def excluiranuncio(id_anuncio):
     anuncio = Anuncio.query.get(id_anuncio)
-    if anuncio:
-        db.session.delete(anuncio)
-        db.session.commit()
+    if not anuncio:
+        return "Anúncio não encontrado", 404    
+
+    if request.method =='POST':
+        if request.form.get('confirmar') == 'sim':
+            db.session.delete(anuncio)
+            db.session.commit()
         return redirect(url_for('cadanuncio'))
     else:
         return "Anúncio não encontrado", 404
+    
+    # GET: exibe a tela de confirmação
+    return render_template('confirmarexclusão.html', url_cancelar='cadanuncio')         
 
 
 ####################### PRODUTOS #######################
