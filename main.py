@@ -5,6 +5,8 @@ from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from flask import url_for
 from flask import redirect
+from datetime import datetime
+
 
 app = Flask(__name__)
 ## Configurando a ligação com o BD  = 'mysql://USUARIO:SENHA@SERVIDOR:PORTA/DATABASE'
@@ -14,7 +16,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://testuser:toledo22@localhost:330
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  
 
 db = SQLAlchemy(app)
-
 
 ####### MODELS - CLASSES QUE REPRESENTAM AS TABELAS DO BANCO DE DADOS #######
 class Usuario(db.Model):
@@ -32,7 +33,6 @@ class Usuario(db.Model):
     estado = db.Column('estado', db.String(20))
     cep = db.Column('cep', db.String(100))
   
-    ## constroe automaticamente um objeto com estes valores
     def __init__(self, nome, login, senha, email, fone, rua, numero, bairro, cidade, estado, cep):
         self.nome = nome
         self.login = login
@@ -55,18 +55,17 @@ class Anuncio(db.Model):
     quantidade = db.Column('quantidade', db.Integer)   # Quantidade do Anúncio
     valor = db.Column('valor', db.Float) # Valor do Anúncio
     situacao = db.Column('situacao', db.String(45))  # Situação do Anúncio (Ativo, Vendido, Cancelado)
-    id_us_prop_anuncio = db.Column('id_us_prop_anuncio', db.ForeignKey('usuario.id_usuario'))
+    id_us_prop_anuncio = db.Column('id_us_prop_anuncio', db.Integer, db.ForeignKey('usuario.id_usuario'))
     id_cat = db.Column('id_categoria', db.ForeignKey('categoria.id_categoria'))   
     
-    ## constroe automaticamente um objeto com estes valores
-    def __init__(self, nome, descricao, data, quantidade, valor, situacao, is_us_prop_anuncio, id_cat):
+    def __init__(self, nome, descricao, data, quantidade, valor, situacao, id_us_prop_anuncio, id_cat):
          self.nome = nome
          self.descricao = descricao
          self.data = data
          self.quantidade = quantidade
          self.valor = valor
          self.situacao = situacao
-         self.is_us_prop_anuncio = is_us_prop_anuncio
+         self.id_us_prop_anuncio = id_us_prop_anuncio
          self.id_cat = id_cat   
 
 class Perg_resp(db.Model):
@@ -78,7 +77,9 @@ class Perg_resp(db.Model):
     id_anuncio = db.Column('id_anuncio', db.ForeignKey('anuncio.id_anuncio'))
     id_usuario = db.Column('id_usuario', db.ForeignKey('usuario.id_usuario'))
 
-    ## constroe automaticamente um objeto com estes valores
+    anuncio= db.relationship('Anuncio', backref='perguntas_respostas')  
+    usuario = db.relationship('Usuario', backref='perguntas_respostas') 
+ 
     def __init__(self, tipo, data, descricao, id_anuncio, id_usuario):  
         self.tipo = tipo
         self.data = data
@@ -91,7 +92,6 @@ class Categoria(db.Model):
     id_categoria = db.Column('id_categoria', db.Integer, primary_key=True)
     descricao = db.Column('descricao', db.String(500))
     
-    ## constroe automaticamente um objeto com estes valores
     def __init__(self, descricao):
         self.descricao = descricao
 
@@ -101,7 +101,6 @@ class Anunc_favor(db.Model):
     id_anuncio_favorito = db.Column('id_anuncio_favorito', db.Integer, nullable=False)
     id_usuario = db.Column('id_usuario', db.ForeignKey('usuario.id_usuario'))
 
-    ## constroe automaticamente um objeto com estes valores
     def __init__(self, data, id_anuncio_favorito, id_usuario):
         self.id_anuncio = id_anuncio
         self.id_usuario = id_usuario   
@@ -113,31 +112,17 @@ class Compra(db.Model):
     data = db.Column('data', db.DateTime, nullable=False)
     valor = db.Column('valor', db.Float)
     nota_fiscal = db.Column('nota_fiscal', db.String(500))
-    ###id_produto = db.Column('id_produto', db.ForeignKey('produto.id_produto'))
     id_usuario = db.Column('id_usuario', db.ForeignKey('usuario.id_usuario'))
+    id_anuncio = db.Column('id_anuncio', db.ForeignKey('anuncio.id_anuncio'))
 
-    ## constroe automaticamente um objeto com estes valores
     def __init__(self, tipo, data, valor, nota_fiscal, id_anuncio, id_usuario): 
         self.tipo = tipo
         self.data = data
         self.valor = valor
         self.nota_fiscal = nota_fiscal
         self.id_anuncio = id_anuncio
-        self.id_usuario = id_usuario
-
-class Produto(db.Model):
-    __tablename__ = "produto"  
-    id_produto = db.Column('id_produto', db.Integer, primary_key=True)  
-    descricao = db.Column('descricao', db.String(500))
-    valor = db.Column('valor', db.Float)
-    qt_estoque = db.Column('qt_estoque', db.Integer)
-    ## constroe automaticamente um objeto com estes valores    
-    def __init__(self, descricao, valor, qt_estoque):
-        self.descricao = descricao
-        self.valor = valor
-        self.qt_estoque = qt_estoque       
-
-
+        self.id_usuario = id_usuario  
+       
 
 ####################### ROTAS #######################
 ### Rota para tratamento de erro 404 - Página não encontrada
@@ -145,11 +130,13 @@ class Produto(db.Model):
 def paginanaoencontrada(error):
     return render_template('pagnaoencontrada.html'), 404    
 
+### ROTA PARA A PÁGINA INICIAL E LISTAGEM DE ANÚNCIOS ATIVOS
 @app.route("/")
 def index():
-    return render_template('index.html')
+    anuncios_ativos = Anuncio.query.filter_by(situacao="Ativo").all()
+    return render_template('index.html', anuncios=anuncios_ativos)
 
-####################### USUARIOS #######################
+####################### USUARIOS - ROTAS #######################
 @app.route("/cad/usuarios")
 def cadusuario():
     return render_template('usuarios.html', usuarios = Usuario.query.all(), titulo="Usuarios")
@@ -223,13 +210,12 @@ def excluirusuario(id_usuario):
             return redirect(url_for('cadusuario'))      
         else:
             return redirect(url_for('cadusuario')) 
-    
-    # GET: exibe a tela de confirmação
+ 
     return render_template(
         'confirmarexclusão.html',
         url_cancelar ='cadusuario')
          
-####################### CATEGORIAS #######################
+####################### CATEGORIAS - ROTAS #######################
 @app.route("/cad/categoria")
 def cadcategoria():
     return render_template('categorias.html',categorias = Categoria.query.all(), titulo="Categorias")
@@ -276,8 +262,7 @@ def excluircategoria(id_categoria):
             return "Categoria não encontrada", 404
     return render_template('confirmarexclusão.html',url_cancelar ='cadcategoria')  
 
-
-####################### ANUNCIOS #######################
+####################### ANUNCIOS - ROTAS #######################
 @app.route("/cad/anuncio")
 def cadanuncio():
     return render_template('anuncios.html',
@@ -288,36 +273,47 @@ def cadanuncio():
 
 @app.route("/anuncio/criar", methods=['POST'])
 def criaranuncio(): 
+    data_str = request.form.get('data')  
+    data = datetime.strptime(data_str, '%Y-%m-%d') if data_str else None
+
+    valor_str = request.form.get('valor', '').replace(',', '.')
+    valor = float(valor_str) if valor_str else 0.0
+
+    quantidade_str = request.form.get('quantidade', '0')
+    quantidade = int(quantidade_str) if quantidade_str.isdigit() else 0
+
+    id_us_prop_anuncio = int(request.form.get('id_us_prop_anuncio'))
+    id_cat = int(request.form.get('id_cat'))
+    print(f"id_us_prop_anuncio: {id_us_prop_anuncio}, id_cat: {id_cat}")    
+
     anuncio = Anuncio(
         request.form.get('nome'),
         request.form.get('descricao'),
-        request.form.get('data'),
-        request.form.get('quantidade'),
-        request.form.get('valor'),
+        data,
+        quantidade,
+        valor,
         request.form.get('situacao'),
-        request.form.get('id_us_prop_anuncio' ),  # ID do Usuário Proprietário do Anúncio
-        request.form.get('id_cat')  # ID da Categoria          
+        id_us_prop_anuncio,  
+        id_cat          
     )
     db.session.add(anuncio)
     db.session.commit()
     return redirect(url_for('cadanuncio'))
 
-@app.route("/anuncio/detalhar/<int:id_anuncio>")
+@app.route("/detalharanuncio/<int:id_anuncio>")
 def detalharanuncio(id_anuncio):
     anuncio = Anuncio.query.get(id_anuncio)
-    if anuncio:
-        return anuncio.id_anuncio + "<br>" + \
-               anuncio.nome + "<br>" + \
-               anuncio.descricao + "<br>" + \
-               str(anuncio.data) + "<br>" + \
-               str(anuncio.quantidade) + "<br>" + \
-               str(anuncio.valor) + "<br>" + \
-               anuncio.situacao + "<br>" + \
-               str(anuncio.is_us_prop_anuncio) + "<br>" + \
-               str(anuncio.id_cat) + "<br>"                
-    else:
-        return "Anúncio não encontrado", 404
+    mensagens = Perg_resp.query.filter_by(id_anuncio=id_anuncio).order_by(Perg_resp.data.desc()).all()
 
+    # Usuário fixo para testes (ex: id 1) depois de implementar o login, substituir por get_usuario_logado()
+    usuario_logado = Usuario.query.get(3)
+        
+    return render_template('detalharanuncio.html',
+                            anuncio=anuncio,
+                            mensagens=mensagens,
+                            usuario_logado=usuario_logado,
+                            titulo="Anúncios")  
+    
 @app.route("/anuncio/editar/<int:id_anuncio>", methods=['GET', 'POST'])
 def editaranuncio(id_anuncio):
     anuncio = Anuncio.query.get(id_anuncio)
@@ -341,43 +337,37 @@ def excluiranuncio(id_anuncio):
     if not anuncio:
         return "Anúncio não encontrado", 404    
 
-    if request.method =='POST':
+    if request.method == 'POST':
         if request.form.get('confirmar') == 'sim':
             db.session.delete(anuncio)
             db.session.commit()
-        return redirect(url_for('cadanuncio'))
-    else:
-        return "Anúncio não encontrado", 404
+            return redirect(url_for('cadanuncio'))
+        else:
+            return redirect(url_for('cadanuncio'))
     
-    # GET: exibe a tela de confirmação
     return render_template('confirmarexclusão.html', url_cancelar='cadanuncio')         
 
+@app.route('/enviar_pergunta_resposta/<int:id_anuncio>', methods=['POST'])
+def enviar_pergunta_resposta(id_anuncio):
+    descricao = request.form['descricao']
+    tipo = request.form['tipo']
+    id_usuario = request.form['id_usuario']
 
-####################### PRODUTOS #######################
-@app.route("/cad/produto")
-def cadproduto():
-    return render_template('produtos.html', produtos = Produto.query.all(), titulo="Produtos")
-
-@app.route("/produto/novo", methods=['POST']) 
-def novoproduto():
-    produto = Produto(
-        request.form.get('descricao'),
-        request.form.get('valor'),
-        request.form.get('qt_estoque')
+    nova_mensagem = Perg_resp(
+        descricao=descricao,
+        tipo=tipo,
+        data=datetime.now(),
+        id_anuncio=id_anuncio,
+        id_usuario=id_usuario
     )
-    db.session.add(produto)
+
+    db.session.add(nova_mensagem)
     db.session.commit()
-    return redirect(url_for('cadproduto'))  
 
-############## DEPOIS DESTE PONTO, SÓ SÃO ROTAS PARA TESTE, NÃO FORAM IMPLEMENTADAS AS FUNÇÕES DE CADASTRO
-@app.route("/anuncios/perguntas")
-def anun_perguntas():
-    return render_template('anun_perguntas.html')
+    return redirect(url_for('detalharanuncio', id_anuncio=id_anuncio))
 
-@app.route("/anuncios/respostas")
-def anun_respostas():
-    return render_template('anun_respostas.html')
 
+############## DESTE PONTO EM DIANTE, ROTAS AINDA EM DESENVOLVIMENTO ####
 @app.route("/anuncios/compra")
 def anun_compra():
     print ("anuncio comprado")
@@ -397,6 +387,5 @@ def rel_compras():
     return render_template('rel_compras.html')
 
 if __name__ =='main':
-    print("Criando tabelas...")
     with app.app_context():
          db.create_all()
