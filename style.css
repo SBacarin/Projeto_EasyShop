@@ -1,0 +1,42 @@
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+.menu {
+    background: #d5da5f;
+    color: #080808;
+    padding: 10px 0;
+    text-align: center;
+}
+.menu a {
+    color: #070707;
+    margin: 0 20px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.anuncios-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #f4f4f4;
+    border-top: 2px solid #ccc;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px 0;
+}
+.anuncio-card {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 0 10px;
+    padding: 10px;
+    min-width: 220px;
+    vertical-align: top;
+    box-shadow: 1px 1px 6px #ccc;
+}
+.anuncio-card h4 {
+    margin: 0 0 5px 0;
+}
+.anuncio-card p {
+    margin: 2px 0;
+    font-size: 0.95em;
+}

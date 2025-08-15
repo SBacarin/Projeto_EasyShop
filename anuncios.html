@@ -13,17 +13,23 @@
         <textarea rows="4" cols="50" id="descricao" name="descricao"></textarea></p> 
 
         <p><label for="data">Data do Anuncio<label>
-        <input type="text" id="data" name="data"> </p>
+        <input type="date" id="data" name="data"> </p>
 
         <p><label for="quant">Quantidade<label>
-        <input type="text" id="quant" name="quant"> </p>
+        <input type="number" id="quant" name="quant"> </p>
 
         <p><label for="valor">Valor<label>
-        <input type="text" id="valor" name="valor"> </p>
+        <input type="number" step="0.01" id="valor" name="valor"> </p>
 
-        <p><label for="situacao">Situação<label>
-        <input type="text" id="situacao" name="situacao"> </p
->
+        <p>
+        <label for="situacao">Situação</label>
+        <select id="situacao" name="situacao" required>
+            <option value="Ativo">Ativo</option>
+            <option value="Vendido">Vendido</option>
+            <option value="Cancelado">Cancelado</option>
+        </select>
+        </p>
+        
         <p><label for="id_us_prop_anuncio">Selecione o Usuário Proprietário   <label>
         <select id="id_us_prop_anuncio" name="id_us_prop_anuncio">
             {% for u in usuarios %}
@@ -34,11 +40,12 @@
         <p><label for="id_cat">Selecione a Categoria<label>
         <select id="id_cat" name="id_cat">
             {% for c in categorias %}
-                <option value="{{ c.id_categoria }}">{{ c.descricao }}</option>
+                <option value="{{ c.id_categoria }}">{{ c.descricao}} </option>
             {% endfor %}    
         </select> </p>   
    
-        <p><input type="submit" value="Cadastrar"> </p>
+        <p><input type="submit" value="Cadastrar">
+        <a href="{{ url_for('index') }}">Voltar</a> </p>
     </form>
     
     <h4>Lista de {{titulo}}</h4>
@@ -71,19 +78,10 @@
                 <td>{{ a.id_us_prop_anuncio }}</td>
                 <td>{{ a.id_cat }}</td>
                 <td><a href={{ url_for("editaranuncio", id_anuncio=a.id_anuncio) }}> Editar? </a></td>
-                <td><a href={{ url_for("excluiranuncio", id_anuncio=a.ide_anuncio) }}> Deletar? </a></td>
+                <td><a href={{ url_for("excluiranuncio", id_anuncio=a.id_anuncio) }}> Deletar? </a></td>
             </tr>
             {% endfor %}
         </tbody>
      </table>
 </body>
-
-
-
-
-
-
-
-</body>
-
 </html>
