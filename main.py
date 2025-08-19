@@ -6,7 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import url_for
 from flask import redirect
 from datetime import datetime
+from flask_login import (current_user, LoginManager, login_user, logout_user, login_required)
 
+import hashlib  
 
 app = Flask(__name__)
 ## Configurando a ligação com o BD  = 'mysql://USUARIO:SENHA@SERVIDOR:PORTA/DATABASE'
@@ -17,13 +19,19 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+app.secret_key = 'cavalo come arroz integral'
+login_manager = LoginManager()
+login_manager.init_app(app) 
+login_manager.login_view = 'login'  # Define a rota de login
+
+
 ####### MODELS - CLASSES QUE REPRESENTAM AS TABELAS DO BANCO DE DADOS #######
 class Usuario(db.Model):
     __tablename__ = "usuario"
     id_usuario = db.Column('id_usuario', db.Integer, primary_key=True)
     nome = db.Column('nome', db.String(200)) 
     login = db.Column('login', db.String(50))
-    senha = db.Column('senha', db.String(50))
+    senha = db.Column('senha', db.String(256))  # Senha criptografada
     email = db.Column('email', db.String(150))
     fone = db.Column('fone', db.String(100))
     rua = db.Column('rua', db.String(256))
@@ -46,6 +54,18 @@ class Usuario(db.Model):
         self.estado = estado
         self.cep = cep
 
+    def is_authenticated(self):
+        return True
+    
+    def is_active(self):
+        return True 
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):   
+        return str(self.id_usuario) 
+    
 class Anuncio(db.Model):
     __tablename__ = "anuncio"
     id_anuncio = db.Column('id_anuncio', db.Integer, primary_key=True)
@@ -130,23 +150,53 @@ class Compra(db.Model):
 def paginanaoencontrada(error):
     return render_template('pagnaoencontrada.html'), 404    
 
+#### Configuração do carregamento do usuário para o Flask-Login
+@login_manager.user_loader
+def load_user(id_usuario):
+    return Usuario.query.get(int(id_usuario))      
+
 ### ROTA PARA A PÁGINA INICIAL E LISTAGEM DE ANÚNCIOS ATIVOS
 @app.route("/")
+@login_required  # Garante que o usuário esteja logado para acessar a página inicial
 def index():
     anuncios_ativos = Anuncio.query.filter_by(situacao="Ativo").all()
     return render_template('index.html', anuncios=anuncios_ativos)
 
+### ROTA PARA LOGIN E LOGOUT
+@app.route("/login", methods=['GET', 'POST'])
+def login():    
+    if request.method == 'POST':
+        login = request.form.get('login')
+        senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
+        user = Usuario.query.filter_by(login=login, senha=senha).first()
+        
+        if user:
+            login_user(user)
+            return redirect(url_for('index'))
+        else:
+            return "Login ou senha inválidos", 404  
+            redirect(url_for('login'))
+    return render_template('login.html', titulo="Login")
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('index'))   
+
 ####################### USUARIOS - ROTAS #######################
 @app.route("/cad/usuarios")
+@login_required  
 def cadusuario():
     return render_template('usuarios.html', usuarios = Usuario.query.all(), titulo="Usuarios")
 
 @app.route("/usuario/criar", methods=['POST'])
 def criarusuario():
+    # Criptografando a senha antes de armazenar
+    hash = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
     usuario = Usuario(
         request.form.get('nome'),
         request.form.get('login'),
-        request.form.get('senha'),
+        hash,
         request.form.get('email'),
         request.form.get('fone'),
         request.form.get('rua'),
@@ -183,7 +233,7 @@ def editarusuario(id_usuario):
     if request.method == 'POST':
         usuario.nome = request.form.get('nome')
         usuario.login = request.form.get('login')
-        usuario.senha = request.form.get('senha')
+        usuario.senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
         usuario.email = request.form.get('email')   
         usuario.fone = request.form.get('fone')
         usuario.rua = request.form.get('rua')
@@ -217,6 +267,7 @@ def excluirusuario(id_usuario):
          
 ####################### CATEGORIAS - ROTAS #######################
 @app.route("/cad/categoria")
+@login_required
 def cadcategoria():
     return render_template('categorias.html',categorias = Categoria.query.all(), titulo="Categorias")
 
@@ -264,6 +315,7 @@ def excluircategoria(id_categoria):
 
 ####################### ANUNCIOS - ROTAS #######################
 @app.route("/cad/anuncio")
+@login_required
 def cadanuncio():
     return render_template('anuncios.html',
     anuncios=Anuncio.query.all(),
@@ -329,7 +381,13 @@ def editaranuncio(id_anuncio):
         db.session.add(anuncio)
         db.session.commit()
         return redirect(url_for('cadanuncio'))
-    return render_template('edit_anuncio.html', anuncio = anuncio, titulo="Anúncios")
+
+    categorias = Categoria.query.all()
+    
+    return render_template('edit_anuncio.html',
+                            anuncio = anuncio,
+                            categorias=categorias,
+                            titulo="Anúncios")
 
 @app.route("/anuncio/excluir/<int:id_anuncio>", methods=['GET', 'POST'])
 def excluiranuncio(id_anuncio):

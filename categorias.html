@@ -2,19 +2,32 @@
 <html>
 <head>
     <title> EASYSHOP - Cadastro de {{titulo}} </title>
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
 </head>
 <body>
-     <h4>Cadastro de {{titulo}}</h4>
+    <div class="container">
+        <div class="page-header">
+            <h1>Cadastro de {{titulo}}</h1>
+        </div>
+
     <form action="/categoria/criar" method="post">
-        <p><label for="descricao">Descrição<label> 
-        <input type="text" id="descricao" name="descricao"> </p>
+        <div class="form-group">
+            <label for="descricao" class="form-label">Descrição</label>
+            <input type="text" class="form-control" id="descricao" name="descricao">        
+        </div>
         
-        <p><input type="submit" value="Cadastrar"> 
-        <a href="{{ url_for('index') }}">Voltar</a> </p>
+        <br>
+ 
+        <button class="btn btn-primary" type="submit" value="Cadastrar">Cadastrar</button>
+        <button class="btn btn-secondary" type="reset" value="Limpar">Limpar</button>
+        <button class="btn btn-primary" type="button" onclick="window.location.href='{{ url_for('index') }}'">Voltar</button>    
+        
     </form>
-     <h4>Lista de {{titulo}}</h4>
-     <table>
-        <thead>
+    <br>
+     
+    <h4>Lista de {{titulo}}</h4>
+     <table class="table-striped table-responsive table-bordered">
+        <thead class="thread-default">
             <tr>
                 <th> Código </th>
                 <th> Descricao </th>
