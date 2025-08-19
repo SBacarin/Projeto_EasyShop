@@ -2,13 +2,17 @@
 <html>
 <head>
     <title>Confirmar Exclusão</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
 </head>
 <body>
-    <h3>Tem certeza que deseja excluir?</h3>
-    <form method="post">
-        <button type="submit" name="confirmar" value="sim">Sim</button>
-        <button type="submit" name="confirmar" value="nao">Não</button>
-    </form>
-    <a href="{{ url_for(url_cancelar) }}">Cancelar</a>
+    <div class="container">
+        <div class="page-header">
+            <h3>Confirmação de Exclusão</h3>
+        </div>
+        <form method="post">
+            <button type="submit" name="confirmar" value="sim">Sim</button>
+            <button type="submit" name="confirmar" value="nao">Não</button>
+        </form>
+        <a href="{{ url_for(url_cancelar) }}">Cancelar</a>
 </body>
 </html>

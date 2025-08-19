@@ -2,15 +2,24 @@
 <html>
 <head>
     <title> EASYSHOP - Edição de {{titulo}} </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
 </head>
 <body>
-     <h4>Edição de {{titulo}}</h4>
-    <form action="{{ url_for('editarcategoria', id_categoria=categoria.id_categoria) }}" method="post">
-        <p><label for="descricao">Descrição<label> 
-        <input type="text" id="descricao" name="descricao" value="{{categoria.descricao}}"> </p>
-        
-        <p><input type="submit" value="Alterar"> </p>
-    </form>
-    <a href="{{ url_for('cadcategoria') }}">Cancelar</a>
+    <div class="container">
+        <div class="page-header">
+            <h4>Edição de {{titulo}}</h4>
+        </div>
+        <form action="{{ url_for('editarcategoria', id_categoria=categoria.id_categoria) }}" method="post">
+            <div class="form-group">    
+                <label for="descricao" class="form-label">Descrição<label> 
+                <input type="text" class="form-control" id="descricao" name="descricao" value="{{categoria.descricao}}"> </p>
+            </div>  
+            <br>
+            <button class="btn btn-primary" type="submit" value="Alterar">Cadastrar</button>
+            <button class="btn btn-primary" type="button" onclick="window.location.href='{{ url_for('cadcategoria') }}'">Cancelar</button>
+            <br>
+        </form>
+    </div>  
+
 
 </html>
