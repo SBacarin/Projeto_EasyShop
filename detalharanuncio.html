@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>EasyShop - Detalhes do Anúncio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
 </head>
 <body>
     <div class="menu">
@@ -43,8 +43,10 @@
                 <!-- Campo oculto com ID do usuário logado -->
                 <input type="hidden" name="id_usuario" value="{{ usuario_logado.id_usuario }}">
 
-                <button type="submit">Enviar</button>
-            </form>
+                <button class="btn btn-primary" type="submit">Enviar</button>
+                <button class="btn btn-secondary" type="submit">Comprar</button>
+                <button class="btn btn-primary" type="submit">Marcar como Favorito</button>
+                </form>
             <hr>
 
             <!-- Exibe perguntas e respostas -->

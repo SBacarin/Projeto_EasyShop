@@ -1,17 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> EASYSHOP - Login </title>
+    <title>EasyShop - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
 </head>
 <body>
-    <h4>Login</h4>
-    <form action="/login" method="post">
-        <p><label for="login">Descrição<label> 
-        <input type="text" id="login" name="login"> </p>
-        
-        <p><label for="senha">Descrição<label> 
-        <input type="text" id="senha" name="senha"> </p>
+    <div class="container">
+        <div class="menu">
+            <h1>EasyShop - O seu melhor E-commerce!</h1>
+        </div>
 
-        <p><input type="submit" value="logar"> 
+        <div style="padding: 40px 20px 100px 20px;">
+            <h2>Bem-vindo ao EasyShop!</h2>
+            <p>Digite seu Login e Senha para iniciar a sessão.</p>
+        </div>
+
+    <form action="/login" method="post">
+        <div class="form-group">
+            <label for="login" class="form-label">Login</label>
+            <input type="text" class="form-control w-auto" id="login" name="login" required placeholder="Digite seu login">
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="senha" class="form-label">Senha</label>
+            <input type="password" class="form-control w-auto" id="senha" name="senha" required placeholder="Digite sua senha">    
+        </div>
+        <br>
+        <button class="btn btn-primary" type="submit" value="logar">Entrar</button>
+        <button class="btn btn-secondary" type="button" onclick="window.location.href='{{ url_for('cadusuario') }}'">Novo Usuário</button>
+        <br>
      </form>
+
+   
+</body>
+<br><br><br><br><br><br><br><br><br><br><br>  
+ <div class="footer">
+        <p>© 2024 EasyShop. Todos os direitos reservados. Desenvolvido por Bacarin Softwares Solutions Ltda</p>
+</div>
 </html>
+
+
+    
