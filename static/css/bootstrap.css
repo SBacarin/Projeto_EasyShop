@@ -4,6 +4,58 @@
  * Copyright 2011-2025 The Bootstrap Authors
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
+
+/* Styles Customizados para EasyShop */
+ body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+.menu {
+    background: #d5da5f;
+    color: #080808;
+    padding: 10px 0;
+    text-align: center;
+}
+.menu a {
+    color: #070707;
+    margin: 0 20px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.anuncios-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #f4f4f4;
+    border-top: 2px solid #ccc;
+    padding: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    height: 500px;
+}
+
+.anuncio-card {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 0 10px;
+    padding: 10px;
+    min-width: 220px;
+    vertical-align: top;
+    box-shadow: 1px 1px 6px #ccc;
+    height: 140px;
+}
+
+.anuncio-card h4 {
+    margin: 0 0 4px 0;
+}
+.anuncio-card p {
+    margin: 2px 0;
+    font-size: 0.75em;
+}
+
+/* Bootstrap CSS Variables */
 :root,
 [data-bs-theme=light] {
   --bs-blue: #0d6efd;
@@ -193,7 +245,7 @@
   }
 }
 
-body {
+mbody {
   margin: 0;
   font-family: var(--bs-body-font-family);
   font-size: var(--bs-body-font-size);
