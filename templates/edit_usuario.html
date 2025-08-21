@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> EASYSHOP - Edição de {{titulo}} </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Edição de {{titulo}}</h1>
+        </div>
+
+        <form action="{{ url_for('editarusuario', id_usuario=usuario.id_usuario) }}" method="post">
+            <div class="form-group">
+                <label for="nome" class="form-label">Nome</label> 
+                <input type="text" class="form-control" id="nome" name="nome" value="{{usuario.nome}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="login" class="form-label">Login</label> 
+                <input type="text" class="form-control"id="login" name="login" value="{{usuario.login}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="senha" class="form-label">Senha</label> 
+                <input type="text" class="form-control" id="senha" name="senha" value="{{usuario.senha}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="text" class="form-control" id="email" name="email" value="{{usuario.email}}"> 
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="fone" class="form-label">Fone</label>
+                <input type="text" class="form-control" id="fone" name="fone" value="{{usuario.fone}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="rua" class="form-label">Rua</label>
+                <input type="text" class="form-control" id="rua" name="rua" value="{{usuario.rua}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="numero" class="form-label">Numero</label>
+                <input type="text" class="form-control" id="numero" name="numero" value="{{usuario.numero}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="bairro" class="form-label">Bairro</label>
+                <input type="text" class="form-control" id="bairro" name="bairro" value="{{usuario.bairro}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="cidade" class="form-label">Cidade</label>
+                <input type="text" class="form-control" id="cidade" name="cidade" value="{{usuario.cidade}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="estado" class="form-label">Estado</label>
+                <input type="text" class="form-control" id="estado" name="estado" value="{{usuario.estado}}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="cep" class="form-label">CEP</label>
+                <input type="text" class="form-control" id="cep" name="cep" value="{{usuario.cep}}">
+            </div>
+            <br>    
+            <br>
+            <button class="btn btn-primary" type="submit" value="Alterar">Salvar</button>
+            <button class="btn btn-primary" type="button" onclick="window.location.href='{{ url_for('cadusuario') }}'">Cancelar</button>
+            <br>
+        </form>
+    </div>
+</body>
+
+</html>

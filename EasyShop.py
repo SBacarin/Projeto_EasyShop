@@ -10,20 +10,29 @@ from flask_login import (current_user, LoginManager, login_user, logout_user, lo
 
 import hashlib  
 
+## Inicializando o aplicativo Flask
 app = Flask(__name__)
-## Configurando a ligação com o BD  = 'mysql://USUARIO:SENHA@SERVIDOR:PORTA/DATABASE'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://testuser:toledo22@localhost:3306/mydb'
+app.secret_key = 'Ted2025'
+
+## Configuração para o banco de dados MySQL 
+## Se tiver rodando no PythonAnywhere = modelo 'mysql://USUARIO:SENHA@SERVIDOR:PORTA/DATABASE'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://SBACARIN:toledo22@SBACARIN.mysql.pythonanywhere-services.com:3306/SBACARIN$mydb'
+
+## se tiver rodando local MySQL
+##app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://testuser:toledo22@localhost:3306/mydb'
 
 #uso para retirar um warning
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  
 
+## Inicializando extensões 
 db = SQLAlchemy(app)
-
-app.secret_key = 'cavalo come arroz integral'
 login_manager = LoginManager()
 login_manager.init_app(app) 
 login_manager.login_view = 'login'  # Define a rota de login
 
+# Criação do banco de dados e tabelas, se não existirem
+with app.app_context():
+    db.create_all()
 
 ####### MODELS - CLASSES QUE REPRESENTAM AS TABELAS DO BANCO DE DADOS #######
 class Usuario(db.Model):
@@ -159,12 +168,13 @@ def load_user(id_usuario):
 @app.route("/")
 @login_required  # Garante que o usuário esteja logado para acessar a página inicial
 def index():
+    db.create_all()    
     anuncios_ativos = Anuncio.query.filter_by(situacao="Ativo").all()
     return render_template('index.html', anuncios=anuncios_ativos)
 
 ### ROTA PARA LOGIN E LOGOUT
 @app.route("/login", methods=['GET', 'POST'])
-def login():    
+def login():
     if request.method == 'POST':
         login = request.form.get('login')
         senha = hashlib.sha512(str(request.form.get('senha')).encode("utf-8")).hexdigest()
@@ -446,6 +456,10 @@ def rel_vendas():
 def rel_compras():
     return render_template('rel_compras.html')
 
-if __name__ =='EasyShop.py':
+if __name__ == "__main__":
     with app.app_context():
-         db.create_all()
+        db.create_all()
+    ## se tiver rodando localmente, descomentar a linha abaixo
+    ##app.run(debug=True)
+
+       
